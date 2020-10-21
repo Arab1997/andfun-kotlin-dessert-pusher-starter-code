@@ -12,6 +12,9 @@ import androidx.lifecycle.LifecycleObserver
 import com.example.android.dessertpusher.databinding.ActivityMainBinding
 import timber.log.Timber
 
+const val KEY_REVENUE = "key_revenue"
+const val KEY_SOLD = "key_sold"
+
 class MainActivity : AppCompatActivity(), LifecycleObserver {
 
     private var revenue = 0
@@ -61,6 +64,11 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
 
         // Setup dessertTimer, passing in the lifecycle
         dessertTimer = DessertTimer(this.lifecycle)
+        if (savedInstanceState != null) {
+            revenue = savedInstanceState.getInt(KEY_REVENUE)
+            dessertsSold = savedInstanceState.getInt(KEY_SOLD)
+        }
+
 
         // Set the TextViews to the right values
         binding.revenue = revenue
@@ -94,9 +102,7 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         for (dessert in allDesserts) {
             if (dessertsSold >= dessert.startProductionAmount) {
                 newDessert = dessert
-            }
-
-            else break
+            } else break
         }
 
         // If the new dessert is actually different than the current dessert, update the image
@@ -105,10 +111,7 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
             binding.dessertButton.setImageResource(newDessert.imageId)
         }
     }
-
-    /**
-     * Menu methods
-     */
+    /*** Menu methods*/
     private fun onShare() {
         val shareIntent = ShareCompat.IntentBuilder.from(this)
                 .setText(getString(R.string.share_text, dessertsSold, revenue))
@@ -132,6 +135,17 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
             R.id.shareMenuButton -> onShare()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(KEY_REVENUE, revenue)
+        outState.putInt(KEY_SOLD, dessertsSold)
+        Timber.i("onSaveInstanceState Called")
     }
 
     /** Lifecycle Methods **/
